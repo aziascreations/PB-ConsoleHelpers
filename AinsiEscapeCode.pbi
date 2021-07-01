@@ -3,13 +3,10 @@
 ;         Name: AinsiEscapeCode.pbi
 ;      Version: N/A
 ;       Author: Herwin Bozet
-;
-; ==- Compatibility -=============================
-;  Compiler version: PureBasic 5.70 (x86/x64)
-;  Operating system: Windows 10 21H1 (Previous versions untested)
 ; 
 ; ==- Links & License -===========================
 ;  License: Unlicense
+;  GitHub: https://github.com/aziascreations/PB-ConsoleHelpers
 ;}
 
 ;- Module Declaration
@@ -46,13 +43,22 @@ DeclareModule AinsiEscapeCode
 	#CPL$ = "F"	; Cursor Previous Line by n
 	
 	
+	;-> Screen Buffer
+	#SU$ = "S" ; Scroll text up by <n>. Also known as pan down, new lines fill in from the bottom of the screen.
+	#SD$ = "T" ; croll down by <n>. Also known as pan up, new lines fill in from the top of the screen.
+	
+	
 	;-> Buffer ?
 	#ED$ = "J" ; Erase in Display
-	#ED_0 = 0  ; 0 from cursor to end of screen
-	#ED_1 = 1  ; 1 from cursor to beginning of the screen
-	#ED_2 = 2  ; 2 clear entire screen (May move to 0:0)
-	#ED_3 = 3  ; 3 clear entire screen and lines saved in the scrollback buffer. (Does not work on Windows as of 21H1 in Windows Terminal)
+	#ED_0 = 0  ; Clear from cursor to end of screen
+	#ED_1 = 1  ; Clear from cursor to beginning of the screen
+	#ED_2 = 2  ; Clear entire screen (May move to 0:0)
+	#ED_3 = 3  ; Clear entire screen and lines saved in the scrollback buffer. (Does not work on Windows as of 21H1 in Windows Terminal)
 	
+	#EL$ = "K" ; Erase in Line
+	#EL_0 = 0  ; Clear from cursor to the end of the line.
+	#EL_1 = 1  ; Clear from cursor to beginning of the line.
+	#EL_2 = 2  ; Clear entire line.
 	
 	;-> Queries
 	#DECXCPR$ = "6n" ; Emit the cursor position as: ESC [ <r> ; <c> R Where <r> = cursor row and <c> = cursor column

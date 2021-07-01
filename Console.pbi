@@ -3,14 +3,10 @@
 ;         Name: Console.pbi
 ;      Version: N/A
 ;       Author: Herwin Bozet
-;
-; ==- Compatibility -=============================
-;  Compiler version: PureBasic 5.70 (x86/x64)
-;  Operating system: Windows 10 21H1 (Previous versions untested)
 ; 
 ; ==- Links & License -===========================
 ;  License: Unlicense
-;  MSDN: https://docs.microsoft.com/en-us/windows/console/console-functions
+;  GitHub: https://github.com/aziascreations/PB-ConsoleHelpers
 ;}
 
 ;- Module declaration

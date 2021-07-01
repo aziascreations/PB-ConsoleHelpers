@@ -3,13 +3,10 @@
 ;         Name: VirtualTerminal.pbi
 ;      Version: N/A
 ;       Author: Herwin Bozet
-;
-; ==- Compatibility -=============================
-;  Compiler version: PureBasic 5.70 (x86/x64)
-;  Operating system: Windows 10 21H1 (Previous versions untested)
 ; 
 ; ==- Links & License -===========================
 ;  License: Unlicense
+;  GitHub: https://github.com/aziascreations/PB-ConsoleHelpers
 ;}
 
 ;- Compiler directives
@@ -24,6 +21,8 @@ DeclareModule VirtualTerminal
 	;-> Macros
 	
 	;-> > Console.pbi macros
+	
+	;Macro CursorPosition : Console::CursorPosition : EndMacro
 	
 	Macro IsConsoleApp() : Console::#IsConsoleApp : EndMacro
 	
@@ -66,19 +65,31 @@ DeclareModule VirtualTerminal
 	
 	Macro CursorToColumn(ColumnNumber) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(ColumnNumber) + AinsiEscapeCode::#CHA$) : EndMacro
 	Macro CursorToLine(LineNumber) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(LineNumber) + AinsiEscapeCode::#VPA$) : EndMacro
-	
 	Macro CursorTo(X, Y) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(Y) + ";" + Str(X) + AinsiEscapeCode::#CUP$) : EndMacro	
 	
-	Macro CursorFlip() : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#RI$) : EndMacro
 	Macro CursorSave() : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#DECSC$) : EndMacro
 	Macro CursorRestore() : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#DECSR$) : EndMacro
 	
-	;-> > > Others
+	; Does not appear to work properly in cmd.exe
+	Macro CursorFlip() : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#RI$) : EndMacro
+	
+	;-> > > Screen Buffer
+	Macro ScrollUpBy(Amount = 1) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(Amount) + AinsiEscapeCode::#SU$) : EndMacro
+	Macro ScrollDownBy(Amount = 1) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(Amount) + AinsiEscapeCode::#SD$) : EndMacro
+	Macro ScrollUp() : VirtualTerminal::ScrollUpBy() : EndMacro
+	Macro ScrollDown() : VirtualTerminal::ScrollDownBy() : EndMacro
+	
+	;-> > > Others ?
 	Macro ClearDisplay(Mode = AinsiEscapeCode::#ED_0) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(Mode) + AinsiEscapeCode::#ED$) : EndMacro
 	Macro ClearDisplayToEnd() : VirtualTerminal::ClearDisplay(AinsiEscapeCode::#ED_0) : EndMacro
 	Macro ClearDisplayToStart() : VirtualTerminal::ClearDisplay(AinsiEscapeCode::#ED_1) : EndMacro
 	Macro ClearDisplayFull() : VirtualTerminal::ClearDisplay(AinsiEscapeCode::#ED_2) : EndMacro
 	Macro ClearDisplayAbsolute() : VirtualTerminal::ClearDisplay(AinsiEscapeCode::#ED_3) : EndMacro
+	
+	Macro ClearLineDisplay(Mode = AinsiEscapeCode::#EL_0) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#CSI$ + Str(Mode) + AinsiEscapeCode::#EL$) : EndMacro
+	Macro ClearLineToEnd() : VirtualTerminal::ClearLineDisplay(AinsiEscapeCode::#EL_0) : EndMacro
+	Macro ClearLineToStart() : VirtualTerminal::ClearLineDisplay(AinsiEscapeCode::#EL_1) : EndMacro
+	Macro ClearLineFull() : VirtualTerminal::ClearLineDisplay(AinsiEscapeCode::#EL_2) : EndMacro
 	
 	;-> > > Window
 	Macro SetWindowTitleAndIcon(Title) : VirtualTerminal::WriteOutput(#ESC$ + AinsiEscapeCode::#OSC$ + "0;" + Left(Title, 255) + AinsiEscapeCode::#BEL$) : EndMacro
@@ -89,6 +100,7 @@ DeclareModule VirtualTerminal
 	
 	Declare.b GetCursorPosition(*CursorPosition.Console::CursorPosition, TimeoutMs.i = 1)
 	
+	; May mess up some terminals (ConEmu with cmd doesn't like it at all...)
 	Declare.i GetTerminalWidth(RestorePosition.b = #True)
 	Declare.i GetTerminalHeight(RestorePosition.b = #True)
 EndDeclareModule
@@ -199,15 +211,27 @@ CompilerIf #PB_Compiler_IsMainFile
 		End 1
 	EndIf
 	
+	Define TerminalWidth.i = VirtualTerminal::GetTerminalWidth(#False)
+	Define TerminalHeight.i = VirtualTerminal::GetTerminalHeight(#False)
+	
 	VirtualTerminal::ClearDisplay(AinsiEscapeCode::#ED_2)
 	VirtualTerminal::CursorTo(0, 0)
-	PrintN("-==- Title Bar -==-")
 	
-	Print("Size: "+VirtualTerminal::GetTerminalWidth()+"x"+VirtualTerminal::GetTerminalHeight())
+	VirtualTerminal::WriteOutput(RSet("", TerminalWidth, "#"))
+	VirtualTerminal::WriteOutput(LSet("# Application Title", TerminalWidth-1) + "#")
+	VirtualTerminal::WriteOutput(RSet("", TerminalWidth, "#"))
 	
-	;Print("Press enter key to exit...")
-	Debug Input()
-	;FreeMemory(*Buffer)
+	VirtualTerminal::CursorTo(0, TerminalHeight - 2)
+	
+	VirtualTerminal::WriteOutput(RSet("", TerminalWidth, "#"))
+	VirtualTerminal::WriteOutput(LSet("# Footer text", TerminalWidth-1) + "#")
+	VirtualTerminal::WriteOutput(RSet("", TerminalWidth, "#"))
+	VirtualTerminal::CursorTo(0, 4)
+	
+	
+	
+	Print("Press enter key to exit...")
+	Input()
 	
 	VirtualTerminal::DisableVirtualTerminalProcessing()
 	CloseConsole()
